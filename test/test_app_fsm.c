@@ -8,6 +8,23 @@
 #include "mock_port_sd.h"
 #include "mock_port_delay.h"
 
+// Helper para devolver 1 byte por el puntero del mock UART (debe ir DESPUÉS de incluir mock_port_uart.h)
+#if defined(port_uart_receive_ReturnMemThruPtr_buf)
+#define UART_RETURN_CHAR(c)                         \
+  do {                                              \
+    uint8_t _t = (uint8_t)(c);                      \
+    port_uart_receive_ReturnMemThruPtr_buf(&_t, 1); \
+  } while (0)
+#elif defined(port_uart_receive_ReturnThruPtr_buf)
+#define UART_RETURN_CHAR(c)                   \
+  do {                                        \
+    uint8_t _t = (uint8_t)(c);                \
+    port_uart_receive_ReturnThruPtr_buf(&_t); \
+  } while (0)
+#else
+#define UART_RETURN_CHAR(c) /* si no existe, revisa firma de port_uart_receive */
+#endif
+
 void setUp(void) {
   port_mpu_init_Expect();
   port_adxl_init_Expect();
@@ -28,10 +45,8 @@ void test_estado_inicial_idle(void) {
 
 // Forzamos que UART entregue '1' y dispare ESTADO_MPU
 void test_idle_uart_1_va_a_mpu_y_vuelve_idle_con_delay(void) {
-  uint8_t ch = '1';
   port_uart_receive_ExpectAnyArgsAndReturn(PORT_OK);
-  // Entregar el byte a través del puntero del mock:
-  port_uart_receive_ReturnThruPtr_buf(&ch); // (si tu CMock usa Array/Mem, usa ReturnMemThruPtr_buf(&ch,1))
+  UART_RETURN_CHAR('1'); // <--- usar helper
 
   app_step();
   TEST_ASSERT_EQUAL(ESTADO_MPU, app_get_state());
@@ -45,9 +60,8 @@ void test_idle_uart_1_va_a_mpu_y_vuelve_idle_con_delay(void) {
 
 // Borrar SD con error -> pasa por ESTADO_ERROR y anuncia por UART
 void test_borrar_sd_error_y_manejo_error(void) {
-  uint8_t ch = '4';
   port_uart_receive_ExpectAnyArgsAndReturn(PORT_OK);
-  port_uart_receive_ReturnThruPtr_buf(&ch);
+  UART_RETURN_CHAR('4'); // <--- usar helper
 
   app_step(); // -> ESTADO_BORRAR_SD
   port_sd_truncate_ExpectAndReturn(PORT_ERR);

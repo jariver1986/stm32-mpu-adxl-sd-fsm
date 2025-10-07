@@ -36,8 +36,8 @@
   :source:
     - src/**
   :include:
-    - inc/**
-    - ports/**
+    - inc
+    - ports
   :support:
     - test/support
   :libraries: []
@@ -59,3 +59,10 @@
     :html_high_threshold: 90
     :xml: true
     :xml_filename: build/artifacts/gcov/gcovr/GcovCoverageCobertura.xml
+:tools:
+  :gcovr:
+    :executable: python
+    :name: gcovr
+    :arguments:
+      - -m
+      - gcovr
