@@ -22,19 +22,21 @@
 /** @defgroup ADXL345_RegMap Mapa de registros del ADXL345
  *  @{
  */
-#define DEVID_R            (0x00)  /**< Dirección del registro de identificación del dispositivo */
-#define DEVICE_ADDR        (0x53)  /**< Dirección del dispositivo ADXL345 (no se usa directamente en SPI) */
-#define DATA_FORMAT_R      (0x31)  /**< Dirección del registro de formato de datos */
-#define POWER_CTL_R        (0x2D)  /**< Dirección del registro de control de energía */
-#define DATA_START_ADDR    (0x32)  /**< Dirección inicial para lectura de datos de los ejes */
+#define DEVID_R (0x00) /**< Dirección del registro de identificación del dispositivo */
+#define DEVICE_ADDR                                                                                    \
+  (0x53)                       /**< Dirección del dispositivo ADXL345 (no se usa directamente en SPI) \
+                                */
+#define DATA_FORMAT_R (0x31)   /**< Dirección del registro de formato de datos */
+#define POWER_CTL_R (0x2D)     /**< Dirección del registro de control de energía */
+#define DATA_START_ADDR (0x32) /**< Dirección inicial para lectura de datos de los ejes */
 /** @} */
 
 /** @defgroup ADXL345_Config Configuraciones del ADXL345
  *  @{
  */
-#define FOUR_G             (0x01)  /**< Configura el rango a ±4g */
-#define RESET              (0x00)  /**< Valor de reinicio para ciertos registros */
-#define SET_MEASURE_B      (0x08)  /**< Activa el bit de medición en POWER_CTL */
+#define FOUR_G (0x01)        /**< Configura el rango a ±4g */
+#define RESET (0x00)         /**< Valor de reinicio para ciertos registros */
+#define SET_MEASURE_B (0x08) /**< Activa el bit de medición en POWER_CTL */
 /** @} */
 
 /**
@@ -54,4 +56,3 @@ void adxl_init(void);
 void adxl_read(uint8_t address, uint8_t *rxdata);
 
 #endif /* ADXL345_H_ */
-

@@ -6,9 +6,9 @@
 #ifndef API_DELAY_H
 #define API_DELAY_H
 
-#include <stdint.h>
-#include <stdbool.h>
 #include "stm32f4xx_hal.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 /**
  * @typedef tick_t
@@ -27,9 +27,9 @@ typedef bool bool_t;
  * @brief Estructura para gestionar un retardo no bloqueante.
  */
 typedef struct {
-    tick_t startTime; /**< Tiempo en el que inicia el retardo. */
-    tick_t duration;  /**< Duración del retardo en milisegundos. */
-    bool_t running;   /**< Indica si el retardo está corriendo. */
+  tick_t startTime; /**< Tiempo en el que inicia el retardo. */
+  tick_t duration;  /**< Duración del retardo en milisegundos. */
+  bool_t running;   /**< Indica si el retardo está corriendo. */
 } delay_t;
 
 /**
@@ -76,6 +76,5 @@ uint32_t delayGetCompletedCount(void);
  * @brief Reinicia a cero el contador de retardos completados.
  */
 void delayResetCompletedCount(void);
-
 
 #endif /* API_DELAY_H */

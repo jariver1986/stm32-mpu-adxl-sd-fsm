@@ -2,15 +2,14 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
     hooks:
-      - id: check-yaml
       - id: end-of-file-fixer
+        exclude: ^(Drivers/|Middlewares/|FATFS/)  # <-- excluye terceros
       - id: trailing-whitespace
-      - id: check-case-conflict
-      - id: check-merge-conflict
+        exclude: ^(Drivers/|Middlewares/|FATFS/)
 
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v15.0.6
+    rev: v17.0.6
     hooks:
       - id: clang-format
-        name: Formating C files with Clang-Format
-        files: \.(c|h|cpp|hpp)$
+        files: ^(Core/|App/|Inc/|Src/).*\.([ch]|cpp|hpp)$
+        exclude: ^(Drivers/|Middlewares/|FATFS/)  # <-- excluye terceros

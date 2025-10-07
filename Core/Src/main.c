@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2025 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *a
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2025 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *a
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 // ===============================
@@ -51,13 +51,13 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include <stdio.h>
-#include "stm32f4xx_hal.h"
-#include "fatfs.h"
-#include <string.h>
-#include <stdint.h>
-#include "adxl345.h"
 #include "API_delay.h"
+#include "adxl345.h"
+#include "fatfs.h"
+#include "stm32f4xx_hal.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -67,13 +67,13 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 typedef enum {
-    ESTADO_IDLE,
-    ESTADO_MPU,
-    ESTADO_ADXL,
-    ESTADO_SD,
-	ESTADO_BORRAR_SD,
-	ESTADO_LEER_SD,
-    ESTADO_ERROR
+  ESTADO_IDLE,
+  ESTADO_MPU,
+  ESTADO_ADXL,
+  ESTADO_SD,
+  ESTADO_BORRAR_SD,
+  ESTADO_LEER_SD,
+  ESTADO_ERROR
 } estado_t;
 
 estado_t estadoActual = ESTADO_IDLE;
@@ -96,22 +96,21 @@ SPI_HandleTypeDef hspi2;
 
 UART_HandleTypeDef huart2;
 
-delay_t myDelayMPU,myDelayADXL,myDelaySD;
+delay_t myDelayMPU, myDelayADXL, myDelaySD;
 
 /* USER CODE BEGIN PV */
 // === DEFINICIONES MPU6050 ===
-#define MPU6050_ADDR  (0x68 << 1)
-#define MPU6050_PWR_MGMT_1  0x6B
-#define MPU6050_ACCEL_XOUT_H  0x3B
+#define MPU6050_ADDR (0x68 << 1)
+#define MPU6050_PWR_MGMT_1 0x6B
+#define MPU6050_ACCEL_XOUT_H 0x3B
 
-//extern I2C_HandleTypeDef hi2c1;
-//extern UART_HandleTypeDef huart2;
-//extern DMA_HandleTypeDef hdma_i2c1_rx;
+// extern I2C_HandleTypeDef hi2c1;
+// extern UART_HandleTypeDef huart2;
+// extern DMA_HandleTypeDef hdma_i2c1_rx;
 int16_t AccX, AccY, AccZ, Temp, GyroX, GyroY, GyroZ;
 float Ax, Ay, Az, Gx, Gy, Gz, TempC;
 char msg[150];
 char msg2[128];
-
 
 // FATFS
 FATFS fs;
@@ -124,50 +123,44 @@ char buffer[200];
 uint8_t rxChar;
 char mensajeRoca[] = "La Roca dice: No te rindas, campeon\n";
 
-int16_t x, y, z;          /**< Variables enteras para datos crudos de aceleración. */
-double xg, yg, zg;        /**< Variables para datos de aceleración en g. */
-uint8_t data_rec[6];      /**< Arreglo para almacenar los 6 bytes de datos del ADXL345. */
-
-
+int16_t x, y, z;     /**< Variables enteras para datos crudos de aceleración. */
+double xg, yg, zg;   /**< Variables para datos de aceleración en g. */
+uint8_t data_rec[6]; /**< Arreglo para almacenar los 6 bytes de datos del ADXL345. */
 
 /* USER CODE END PV */
 /* USER CODE BEGIN 0 */
 void MPU6050_Init(void);
 void MPU6050_Read_All(void);
 
-void MPU6050_Init(void)
-{
+void MPU6050_Init(void) {
   uint8_t data = 0x00;
-  HAL_I2C_Mem_Write(&hi2c1, MPU6050_ADDR, MPU6050_PWR_MGMT_1,
-                    I2C_MEMADD_SIZE_8BIT, &data, 1, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Write(&hi2c1, MPU6050_ADDR, MPU6050_PWR_MGMT_1, I2C_MEMADD_SIZE_8BIT, &data, 1,
+                    HAL_MAX_DELAY);
 }
 
-void MPU6050_Read_All(void)
-{
+void MPU6050_Read_All(void) {
   uint8_t raw_data[14];
 
-  HAL_I2C_Mem_Read(&hi2c1, MPU6050_ADDR, MPU6050_ACCEL_XOUT_H,
-                       I2C_MEMADD_SIZE_8BIT, raw_data, 14, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&hi2c1, MPU6050_ADDR, MPU6050_ACCEL_XOUT_H, I2C_MEMADD_SIZE_8BIT, raw_data, 14,
+                   HAL_MAX_DELAY);
 
-    AccX = (raw_data[0] << 8) | raw_data[1];
-    AccY = (raw_data[2] << 8) | raw_data[3];
-    AccZ = (raw_data[4] << 8) | raw_data[5];
-    Temp = (raw_data[6] << 8) | raw_data[7];
-    GyroX = (raw_data[8] << 8) | raw_data[9];
-    GyroY = (raw_data[10] << 8) | raw_data[11];
-    GyroZ = (raw_data[12] << 8) | raw_data[13];
+  AccX = (raw_data[0] << 8) | raw_data[1];
+  AccY = (raw_data[2] << 8) | raw_data[3];
+  AccZ = (raw_data[4] << 8) | raw_data[5];
+  Temp = (raw_data[6] << 8) | raw_data[7];
+  GyroX = (raw_data[8] << 8) | raw_data[9];
+  GyroY = (raw_data[10] << 8) | raw_data[11];
+  GyroZ = (raw_data[12] << 8) | raw_data[13];
 
-    Ax = AccX / 16384.0f;
-    Ay = AccY / 16384.0f;
-    Az = AccZ / 16384.0f;
-    TempC = Temp / 340.0f + 36.53f;
-    Gx = GyroX / 131.0f;
-    Gy = GyroY / 131.0f;
-    Gz = GyroZ / 131.0f;
-
+  Ax = AccX / 16384.0f;
+  Ay = AccY / 16384.0f;
+  Az = AccZ / 16384.0f;
+  TempC = Temp / 340.0f + 36.53f;
+  Gx = GyroX / 131.0f;
+  Gy = GyroY / 131.0f;
+  Gz = GyroZ / 131.0f;
 }
 /* USER CODE END 0 */
-
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
@@ -187,13 +180,11 @@ void leerSD(void);
 
 /* Private user code ---------------------------------------------------------*/
 
-
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
-int main(void)
-{
+ * @brief  The application entry point.
+ * @retval int
+ */
+int main(void) {
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -222,12 +213,12 @@ int main(void)
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
   MPU6050_Init();
-  adxl_init();  /**< Inicializa el acelerómetro ADXL345. */
+  adxl_init(); /**< Inicializa el acelerómetro ADXL345. */
   HAL_Delay(100);
 
   delayInit(&myDelayMPU, 1000);
   delayInit(&myDelayADXL, 500);
-  delayInit(&myDelaySD, 2000);  // Ej. 2 segundos entre escrituras
+  delayInit(&myDelaySD, 2000); // Ej. 2 segundos entre escrituras
 
   inicializarArchivoSD();
 
@@ -235,221 +226,206 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-    {
-	  switch (estadoActual)
-	  {
-	      case ESTADO_IDLE:
-	          if (HAL_UART_Receive(&huart2, &rxChar, 1, 10) == HAL_OK) {
-	              if (rxChar == '1') estadoActual = ESTADO_MPU;
-	              else if (rxChar == '2') estadoActual = ESTADO_ADXL;
-	              else if (rxChar == '3') estadoActual = ESTADO_SD;
-	              else if (rxChar == '4') estadoActual = ESTADO_BORRAR_SD;
-	              else if (rxChar == '5') estadoActual = ESTADO_LEER_SD;
-	              else estadoActual = ESTADO_IDLE;
-	          }
-	          break;
+  while (1) {
+    switch (estadoActual) {
+    case ESTADO_IDLE:
+      if (HAL_UART_Receive(&huart2, &rxChar, 1, 10) == HAL_OK) {
+        if (rxChar == '1')
+          estadoActual = ESTADO_MPU;
+        else if (rxChar == '2')
+          estadoActual = ESTADO_ADXL;
+        else if (rxChar == '3')
+          estadoActual = ESTADO_SD;
+        else if (rxChar == '4')
+          estadoActual = ESTADO_BORRAR_SD;
+        else if (rxChar == '5')
+          estadoActual = ESTADO_LEER_SD;
+        else
+          estadoActual = ESTADO_IDLE;
+      }
+      break;
 
-	      case ESTADO_MPU:
-	    	  if (delayRead(&myDelayMPU))
-	    	  {
-	    		 leerMPU();
-				 estadoActual = ESTADO_IDLE;
-	    	  }
-	          break;
+    case ESTADO_MPU:
+      if (delayRead(&myDelayMPU)) {
+        leerMPU();
+        estadoActual = ESTADO_IDLE;
+      }
+      break;
 
-	      case ESTADO_ADXL:
-	    	  if (delayRead(&myDelayADXL))
-	    	  {
-	    		  leerADXL();
-				  estadoActual = ESTADO_IDLE;
-	    	  }
-	          break;
+    case ESTADO_ADXL:
+      if (delayRead(&myDelayADXL)) {
+        leerADXL();
+        estadoActual = ESTADO_IDLE;
+      }
+      break;
 
-	      case ESTADO_SD:
-	    	  if (delayRead(&myDelaySD))
-	    	  {
-	    		  guardarDatosEnSD();
-	    		  estadoActual = ESTADO_IDLE;
-	    	  }
-	          break;
+    case ESTADO_SD:
+      if (delayRead(&myDelaySD)) {
+        guardarDatosEnSD();
+        estadoActual = ESTADO_IDLE;
+      }
+      break;
 
-	      case ESTADO_BORRAR_SD:
-	    	  borrarSD();
-	    	  break;
+    case ESTADO_BORRAR_SD:
+      borrarSD();
+      break;
 
-	      case ESTADO_LEER_SD:
-	    	  leerSD();
-	    	  break;
+    case ESTADO_LEER_SD:
+      leerSD();
+      break;
 
-	      case ESTADO_ERROR:
-	          HAL_UART_Transmit(&huart2, (uint8_t*)" Error detectado!\r\n", 19, HAL_MAX_DELAY);
-	          estadoActual = ESTADO_IDLE;
-	          break;
+    case ESTADO_ERROR:
+      HAL_UART_Transmit(&huart2, (uint8_t *)" Error detectado!\r\n", 19, HAL_MAX_DELAY);
+      estadoActual = ESTADO_IDLE;
+      break;
 
-	      default:
-	          estadoActual = ESTADO_IDLE;
-	          break;
-	  }
-
+    default:
+      estadoActual = ESTADO_IDLE;
+      break;
     }
+  }
   /* USER CODE END 3 */
 }
 
-void leerMPU(void)
-{
+void leerMPU(void) {
   MPU6050_Read_All();
   int bytes = snprintf(msg, sizeof(msg),
-						   "MPU Acelerometro[g]:  X=%.4f  Y=%.4f  Z=%.4f\r\n"
-						   "MPU Giroscopio[gr/s]: X=%.4f  Y=%.4f  Z=%.4f\r\n"
-						   "MPU Temperatura[C]:   %.2f\r\n\r\n",
-						   Ax, Ay, Az, Gx, Gy, Gz, TempC);
-   if (bytes > 0)
-   {
-	   HAL_UART_Transmit(&huart2, (uint8_t*)msg, bytes, HAL_MAX_DELAY);
-   }
+                       "MPU Acelerometro[g]:  X=%.4f  Y=%.4f  Z=%.4f\r\n"
+                       "MPU Giroscopio[gr/s]: X=%.4f  Y=%.4f  Z=%.4f\r\n"
+                       "MPU Temperatura[C]:   %.2f\r\n\r\n",
+                       Ax, Ay, Az, Gx, Gy, Gz, TempC);
+  if (bytes > 0) {
+    HAL_UART_Transmit(&huart2, (uint8_t *)msg, bytes, HAL_MAX_DELAY);
+  }
 }
 
-void leerADXL(void)
-{
-	adxl_read(DATA_START_ADDR, data_rec);
-	x = ((data_rec[1] << 8) | data_rec[0]);
-	y = ((data_rec[3] << 8) | data_rec[2]);
-	z = ((data_rec[5] << 8) | data_rec[4]);
-	xg = x * 0.0078;
-	yg = y * 0.0078;
-	zg = z * 0.0078;
-	int bytes = snprintf(msg2, sizeof(msg2), "ADXL345[g]: X=%.4f  Y=%.4f  Z=%.4f\r\n\r\n", xg, yg, zg);
-	if (bytes > 0)
-	{
-	  HAL_UART_Transmit(&huart2, (uint8_t*)msg2, bytes, HAL_MAX_DELAY);
-	}
+void leerADXL(void) {
+  adxl_read(DATA_START_ADDR, data_rec);
+  x = ((data_rec[1] << 8) | data_rec[0]);
+  y = ((data_rec[3] << 8) | data_rec[2]);
+  z = ((data_rec[5] << 8) | data_rec[4]);
+  xg = x * 0.0078;
+  yg = y * 0.0078;
+  zg = z * 0.0078;
+  int bytes =
+      snprintf(msg2, sizeof(msg2), "ADXL345[g]: X=%.4f  Y=%.4f  Z=%.4f\r\n\r\n", xg, yg, zg);
+  if (bytes > 0) {
+    HAL_UART_Transmit(&huart2, (uint8_t *)msg2, bytes, HAL_MAX_DELAY);
+  }
 }
 
-void inicializarArchivoSD(void)
-{
-    if (f_mount(&fs, "", 0) != FR_OK) Error_Handler();
+void inicializarArchivoSD(void) {
+  if (f_mount(&fs, "", 0) != FR_OK)
+    Error_Handler();
 
-    if (f_open(&fil, "la_roca.txt", FA_OPEN_ALWAYS | FA_READ | FA_WRITE) != FR_OK)
-        Error_Handler();
+  if (f_open(&fil, "la_roca.txt", FA_OPEN_ALWAYS | FA_READ | FA_WRITE) != FR_OK)
+    Error_Handler();
 
-    // Opcional: verificar espacio
-    if (f_getfree("", &fre_clust, &pfs) != FR_OK) Error_Handler();
-    totalSpace = (uint32_t)((pfs->n_fatent - 2) * pfs->csize * 0.5);
-    freeSpace = (uint32_t)(fre_clust * pfs->csize * 0.5);
-    if (freeSpace < 1) Error_Handler();
+  // Opcional: verificar espacio
+  if (f_getfree("", &fre_clust, &pfs) != FR_OK)
+    Error_Handler();
+  totalSpace = (uint32_t)((pfs->n_fatent - 2) * pfs->csize * 0.5);
+  freeSpace = (uint32_t)(fre_clust * pfs->csize * 0.5);
+  if (freeSpace < 1)
+    Error_Handler();
 
-    // Escribir datos iniciales
-    f_puts("CESE\n", &fil);
-    f_puts("STM32F446RE SD Card via SPI2\n", &fil);
-    f_puts("Cristo la Roca!!!\r\n", &fil);
+  // Escribir datos iniciales
+  f_puts("CESE\n", &fil);
+  f_puts("STM32F446RE SD Card via SPI2\n", &fil);
+  f_puts("Cristo la Roca!!!\r\n", &fil);
 
-    if (f_close(&fil) != FR_OK) Error_Handler();
+  if (f_close(&fil) != FR_OK)
+    Error_Handler();
 
-    // Lectura opcional
-    if (f_open(&fil, "la_roca.txt", FA_READ) != FR_OK) Error_Handler();
-    while (f_gets(buffer, sizeof(buffer), &fil)) {
-    	HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
-    }
-    if (f_close(&fil) != FR_OK) Error_Handler();
+  // Lectura opcional
+  if (f_open(&fil, "la_roca.txt", FA_READ) != FR_OK)
+    Error_Handler();
+  while (f_gets(buffer, sizeof(buffer), &fil)) {
+    HAL_UART_Transmit(&huart2, (uint8_t *)buffer, strlen(buffer), HAL_MAX_DELAY);
+  }
+  if (f_close(&fil) != FR_OK)
+    Error_Handler();
 
-    if (f_mount(NULL, "", 1) != FR_OK) Error_Handler();
+  if (f_mount(NULL, "", 1) != FR_OK)
+    Error_Handler();
 }
 
-void guardarDatosEnSD(void)
-{
-    if (f_mount(&fs, "", 0) != FR_OK) {
-        estadoActual = ESTADO_ERROR;
-        return;
-    }
+void guardarDatosEnSD(void) {
+  if (f_mount(&fs, "", 0) != FR_OK) {
+    estadoActual = ESTADO_ERROR;
+    return;
+  }
 
-    if (f_open(&fil, "la_roca.txt", FA_OPEN_APPEND | FA_WRITE) != FR_OK) {
-        estadoActual = ESTADO_ERROR;
-        return;
-    }
+  if (f_open(&fil, "la_roca.txt", FA_OPEN_APPEND | FA_WRITE) != FR_OK) {
+    estadoActual = ESTADO_ERROR;
+    return;
+  }
 
-    f_puts(msg, &fil);
-    f_puts(msg2, &fil);
-    f_close(&fil);
-    f_mount(NULL, "", 1);
+  f_puts(msg, &fil);
+  f_puts(msg2, &fil);
+  f_close(&fil);
+  f_mount(NULL, "", 1);
 
-    HAL_UART_Transmit(&huart2, (uint8_t*)"Datos guardados en SD.\r\n", 25, HAL_MAX_DELAY);
-
-
+  HAL_UART_Transmit(&huart2, (uint8_t *)"Datos guardados en SD.\r\n", 25, HAL_MAX_DELAY);
 }
 
-void borrarSD(void)
-{
-    if (f_mount(&fs, "", 0) == FR_OK)
-    {
-        if (f_open(&fil, "la_roca.txt", FA_WRITE | FA_CREATE_ALWAYS) == FR_OK)
-        {
-            // ✅ Archivo truncado (contenido eliminado)
-            f_puts("Archivo reiniciado.\r\n", &fil);  // Opcional: escribir línea de cabecera
-            f_close(&fil);
-            char msg[] = "Contenido del archivo borrado.\r\n";
-            HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-        }
-        else
-        {
-            estadoActual = ESTADO_ERROR;
-            return;
-        }
-        f_mount(NULL, "", 1);
+void borrarSD(void) {
+  if (f_mount(&fs, "", 0) == FR_OK) {
+    if (f_open(&fil, "la_roca.txt", FA_WRITE | FA_CREATE_ALWAYS) == FR_OK) {
+      // ✅ Archivo truncado (contenido eliminado)
+      f_puts("Archivo reiniciado.\r\n", &fil); // Opcional: escribir línea de cabecera
+      f_close(&fil);
+      char msg[] = "Contenido del archivo borrado.\r\n";
+      HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
     } else {
-        estadoActual = ESTADO_ERROR;
-        return;
+      estadoActual = ESTADO_ERROR;
+      return;
     }
-    estadoActual = ESTADO_IDLE;
+    f_mount(NULL, "", 1);
+  } else {
+    estadoActual = ESTADO_ERROR;
+    return;
+  }
+  estadoActual = ESTADO_IDLE;
 }
 
-
-void leerSD(void)
-{
-    if (f_mount(&fs, "", 0) == FR_OK)
-    {
-        if (f_open(&fil, "la_roca.txt", FA_READ) == FR_OK)
-        {
-            while (f_gets(buffer, sizeof(buffer), &fil))
-            {
-                HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
-            }
-            f_close(&fil);
-            char fin[] = "\r\nFin de lectura SD\r\n";
-            HAL_UART_Transmit(&huart2, (uint8_t*)fin, strlen(fin), HAL_MAX_DELAY);
-        }
-        else
-        {
-            estadoActual = ESTADO_ERROR;
-            return;
-        }
-        f_mount(NULL, "", 1);
+void leerSD(void) {
+  if (f_mount(&fs, "", 0) == FR_OK) {
+    if (f_open(&fil, "la_roca.txt", FA_READ) == FR_OK) {
+      while (f_gets(buffer, sizeof(buffer), &fil)) {
+        HAL_UART_Transmit(&huart2, (uint8_t *)buffer, strlen(buffer), HAL_MAX_DELAY);
+      }
+      f_close(&fil);
+      char fin[] = "\r\nFin de lectura SD\r\n";
+      HAL_UART_Transmit(&huart2, (uint8_t *)fin, strlen(fin), HAL_MAX_DELAY);
+    } else {
+      estadoActual = ESTADO_ERROR;
+      return;
     }
-    else
-    {
-        estadoActual = ESTADO_ERROR;
-        return;
-    }
-    estadoActual = ESTADO_IDLE;
+    f_mount(NULL, "", 1);
+  } else {
+    estadoActual = ESTADO_ERROR;
+    return;
+  }
+  estadoActual = ESTADO_IDLE;
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
-void SystemClock_Config(void)
-{
+ * @brief System Clock Configuration
+ * @retval None
+ */
+void SystemClock_Config(void) {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
   /** Configure the main internal regulator output voltage
-  */
+   */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
 
   /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
+   * in the RCC_OscInitTypeDef structure.
+   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
@@ -460,33 +436,30 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV4;
   RCC_OscInitStruct.PLL.PLLQ = 2;
   RCC_OscInitStruct.PLL.PLLR = 2;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
     Error_Handler();
   }
 
   /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+   */
+  RCC_ClkInitStruct.ClockType =
+      RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
-  {
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK) {
     Error_Handler();
   }
 }
 
 /**
-  * @brief I2C1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_I2C1_Init(void)
-{
+ * @brief I2C1 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_I2C1_Init(void) {
 
   /* USER CODE BEGIN I2C1_Init 0 */
 
@@ -504,23 +477,20 @@ static void MX_I2C1_Init(void)
   hi2c1.Init.OwnAddress2 = 0;
   hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
   hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
-  {
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK) {
     Error_Handler();
   }
   /* USER CODE BEGIN I2C1_Init 2 */
 
   /* USER CODE END I2C1_Init 2 */
-
 }
 
 /**
-  * @brief SPI2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_SPI2_Init(void)
-{
+ * @brief SPI2 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_SPI2_Init(void) {
 
   /* USER CODE BEGIN SPI2_Init 0 */
 
@@ -542,23 +512,20 @@ static void MX_SPI2_Init(void)
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
   hspi2.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi2) != HAL_OK)
-  {
+  if (HAL_SPI_Init(&hspi2) != HAL_OK) {
     Error_Handler();
   }
   /* USER CODE BEGIN SPI2_Init 2 */
 
   /* USER CODE END SPI2_Init 2 */
-
 }
 
 /**
-  * @brief USART2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USART2_UART_Init(void)
-{
+ * @brief USART2 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_USART2_UART_Init(void) {
 
   /* USER CODE BEGIN USART2_Init 0 */
 
@@ -575,23 +542,20 @@ static void MX_USART2_UART_Init(void)
   huart2.Init.Mode = UART_MODE_TX_RX;
   huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
   huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart2) != HAL_OK)
-  {
+  if (HAL_UART_Init(&huart2) != HAL_OK) {
     Error_Handler();
   }
   /* USER CODE BEGIN USART2_Init 2 */
 
   /* USER CODE END USART2_Init 2 */
-
 }
 
 /**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_GPIO_Init(void)
-{
+ * @brief GPIO Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_GPIO_Init(void) {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
@@ -600,7 +564,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
-  //Configure GPIO pin Output Level
+  // Configure GPIO pin Output Level
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
@@ -609,7 +573,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  //Configure GPIO pin : PA4
+  // Configure GPIO pin : PA4
   GPIO_InitStruct.Pin = GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -619,11 +583,11 @@ static void MX_GPIO_Init(void)
   // Configure SPI2 GPIOs: PB13=SCK, PB14=MISO, PB15=MOSI
   GPIO_InitStruct.Pin = GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL; // Si tu módulo SD no tiene pull-up en MISO, considera PULLUP aquí
+  GPIO_InitStruct.Pull =
+      GPIO_NOPULL; // Si tu módulo SD no tiene pull-up en MISO, considera PULLUP aquí
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
 }
 
 /* USER CODE BEGIN 4 */
@@ -631,30 +595,27 @@ static void MX_GPIO_Init(void)
 /* USER CODE END 4 */
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
-void Error_Handler(void)
-{
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
+void Error_Handler(void) {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
-  while (1)
-  {
+  while (1) {
   }
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
-void assert_failed(uint8_t *file, uint32_t line)
-{
+ * @brief  Reports the name of the source file and the source line number
+ *         where the assert_param error has occurred.
+ * @param  file: pointer to the source file name
+ * @param  line: assert_param error line source number
+ * @retval None
+ */
+void assert_failed(uint8_t *file, uint32_t line) {
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */

@@ -10,7 +10,7 @@ static uint32_t retardoCompletadoContador = 0;
 
 // Función privada: solo se usa internamente
 static void incrementarContador(void) {
-    retardoCompletadoContador++;
+  retardoCompletadoContador++;
 }
 /**
  * @brief Inicializa una estructura de retardo no bloqueante.
@@ -23,14 +23,13 @@ static void incrementarContador(void) {
  *
  * @return Ninguno.
  */
-void delayInit(delay_t *delay, tick_t duration)
-{
-    delay->duration = duration;  /**< Asigna la duración del retardo. */
-    delay->running = false;      /**< Inicializa el estado del retardo como inactivo. */
-    if (delay == NULL)			/**< control de los parámetros. */
-    	return;
-    if (duration == 0)			/**< control de los parámetros. */
-    	return;
+void delayInit(delay_t *delay, tick_t duration) {
+  delay->duration = duration; /**< Asigna la duración del retardo. */
+  delay->running = false;     /**< Inicializa el estado del retardo como inactivo. */
+  if (delay == NULL)          /**< control de los parámetros. */
+    return;
+  if (duration == 0) /**< control de los parámetros. */
+    return;
 }
 
 /**
@@ -44,22 +43,20 @@ void delayInit(delay_t *delay, tick_t duration)
  *
  * @return @c true si el retardo ha terminado, @c false en caso contrario.
  */
-bool_t delayRead(delay_t *delay)
-{
-    if (!delay->running) {
-        delay->startTime = HAL_GetTick(); /**< Captura el tiempo de inicio. */
-        delay->running = true;           /**< Marca el retardo como activo. */
-        return false;
-    }
+bool_t delayRead(delay_t *delay) {
+  if (!delay->running) {
+    delay->startTime = HAL_GetTick(); /**< Captura el tiempo de inicio. */
+    delay->running = true;            /**< Marca el retardo como activo. */
+    return false;
+  }
 
-    if ((HAL_GetTick() - delay->startTime) >= delay->duration) {
-        delay->running = false; /**< Finaliza el retardo. */
-        incrementarContador();  // 🔄 Se llama la función privada
-        return true;
-    }
+  if ((HAL_GetTick() - delay->startTime) >= delay->duration) {
+    delay->running = false; /**< Finaliza el retardo. */
+    incrementarContador();  // 🔄 Se llama la función privada
+    return true;
+  }
 
-
-    return false; /**< El retardo aún no ha finalizado. */
+  return false; /**< El retardo aún no ha finalizado. */
 }
 
 /**
@@ -73,13 +70,12 @@ bool_t delayRead(delay_t *delay)
  *
  * @return Ninguno.
  */
-void delayWrite(delay_t *delay, tick_t duration)
-{
-    delay->duration = duration; /**< Actualiza la duración del retardo. */
-    if (delay == NULL)			/**< control de los parámetros. */
-        	return;
-    if (duration == 0)			/**< control de los parámetros. */
-        	return;
+void delayWrite(delay_t *delay, tick_t duration) {
+  delay->duration = duration; /**< Actualiza la duración del retardo. */
+  if (delay == NULL)          /**< control de los parámetros. */
+    return;
+  if (duration == 0) /**< control de los parámetros. */
+    return;
 }
 
 /**
@@ -89,7 +85,7 @@ void delayWrite(delay_t *delay, tick_t duration)
  * @return true si el retardo está corriendo, false en caso contrario.
  */
 bool_t delayIsRunning(delay_t *delay) {
-    return delay->running; /**< Retorna el estado del retardo. */
+  return delay->running; /**< Retorna el estado del retardo. */
 }
 /**
  * @brief Obtiene la cantidad de veces que se ha completado un retardo.
@@ -101,7 +97,7 @@ bool_t delayIsRunning(delay_t *delay) {
  * @return Número de retardos completados (contador interno).
  */
 uint32_t delayGetCompletedCount(void) {
-    return retardoCompletadoContador;
+  return retardoCompletadoContador;
 }
 
 /**
@@ -112,6 +108,5 @@ uint32_t delayGetCompletedCount(void) {
  * la medición en determinados eventos.
  */
 void delayResetCompletedCount(void) {
-    retardoCompletadoContador = 0;
+  retardoCompletadoContador = 0;
 }
-

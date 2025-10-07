@@ -13,7 +13,7 @@
 
 // Dirección del LCD (PCF8574)
 // ⚠️ Si tu módulo tiene dirección 0x3F en vez de 0x27, cámbialo aquí
-#define LCD_I2C_ADDR (0x27 << 1)  // Dirección de 7 bits << 1 para HAL
+#define LCD_I2C_ADDR (0x27 << 1) // Dirección de 7 bits << 1 para HAL
 
 // Inicializa el LCD (modo 4 bits)
 void LCD_Init(I2C_HandleTypeDef *hi2c);

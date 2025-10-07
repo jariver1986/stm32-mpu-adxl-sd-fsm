@@ -1,5 +1,9 @@
 BasedOnStyle: LLVM
-IndentWidth: 4
-ColumnLimit: 100
-AlignConsecutiveAssignments: true
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+ColumnLimit: 0          # no refluye comentarios/líneas largas
+AlignConsecutiveAssignments: false
+SortIncludes: false      # no reordena includes
 AllowShortFunctionsOnASingleLine: Empty
+BreakBeforeBraces: Attach
