@@ -1,0 +1,51 @@
+# ===========================
+# Normalización de finales de línea
+# ===========================
+
+# Fuerza a que todos los archivos de texto se guarden en el repo con LF
+* text=auto eol=lf
+
+# ===========================
+# Archivos de código fuente
+# ===========================
+*.c     text eol=lf
+*.h     text eol=lf
+*.cpp   text eol=lf
+*.hpp   text eol=lf
+*.s     text eol=lf
+*.ld    text eol=lf
+
+# ===========================
+# Archivos de configuración
+# ===========================
+*.yaml  text eol=lf
+*.yml   text eol=lf
+*.json  text eol=lf
+*.md    text eol=lf
+*.txt   text eol=lf
+
+# ===========================
+# Archivos binarios: nunca tocar
+# ===========================
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.bmp   binary
+*.gif   binary
+*.ico   binary
+*.exe   binary
+*.dll   binary
+*.lib   binary
+*.a     binary
+*.so    binary
+*.bin   binary
+*.hex   binary
+*.elf   binary
+
+# ===========================
+# Archivos de STM32CubeIDE
+# ===========================
+*.ioc   text eol=lf
+*.launch text eol=lf
+*.project text eol=lf
+*.cproject text eol=lf
