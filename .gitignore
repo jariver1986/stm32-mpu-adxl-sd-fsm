@@ -1,26 +1,51 @@
-# Carpetas generadas por el IDE
+# =======================================
+# STM32CubeIDE / Eclipse
+# =======================================
+.metadata/
 .settings/
-Debug/
-Release/
 .vscode/
 .idea/
-
-# Archivos de configuración del workspace
+.project
+.cproject
+.loadpath
 *.launch
 *.ioc
 *.mxproject
-.project
-.cproject
 
-# Archivos compilados
+# =======================================
+# Build outputs
+# =======================================
+Debug/
+Release/
+build/
+out/
+*.elf
+*.hex
+*.bin
+*.map
 *.o
 *.d
-*.elf
-*.map
-*.out
-*.bin
-*.hex
+*.list
+*.srec
 
-# Archivos temporales del sistema
-.DS_Store
+# =======================================
+# Archivos autogenerados (opcional excluir)
+# =======================================
+# Drivers/
+# Middlewares/
+# Core/Startup/
+
+# =======================================
+# OS / Editor
+# =======================================
+*.swp
+*.swo
+*.DS_Store
 Thumbs.db
+
+# =======================================
+# Logs / Backups
+# =======================================
+*.log
+*.bak
+*.tmp
