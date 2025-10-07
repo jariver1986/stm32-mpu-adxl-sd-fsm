@@ -1,29 +1,38 @@
 #include "unity.h"
 #include "app_fsm.h"
 
-// Mocks generados por CMock a partir de los headers en /ports
 #include "mock_port_uart.h"
 #include "mock_port_mpu.h"
 #include "mock_port_adxl.h"
 #include "mock_port_sd.h"
 #include "mock_port_delay.h"
 
-// Helper para devolver 1 byte por el puntero del mock UART (debe ir DESPUÉS de incluir mock_port_uart.h)
-#if defined(port_uart_receive_ReturnMemThruPtr_buf)
-#define UART_RETURN_CHAR(c)                         \
-  do {                                              \
-    uint8_t _t = (uint8_t)(c);                      \
-    port_uart_receive_ReturnMemThruPtr_buf(&_t, 1); \
-  } while (0)
-#elif defined(port_uart_receive_ReturnThruPtr_buf)
-#define UART_RETURN_CHAR(c)                   \
-  do {                                        \
-    uint8_t _t = (uint8_t)(c);                \
-    port_uart_receive_ReturnThruPtr_buf(&_t); \
-  } while (0)
-#else
-#define UART_RETURN_CHAR(c) /* si no existe, revisa firma de port_uart_receive */
-#endif
+// ===== Stub para simular recepción por UART (vía callback) =====
+static uint8_t g_forced_uart_char = 0;
+
+static port_status_t uart_receive_stub(uint8_t *buf,
+                                       uint16_t len,
+                                       uint32_t timeout_ms,
+                                       int cmock_num_calls) {
+  (void)timeout_ms;
+  (void)cmock_num_calls;
+  if (buf && (len > 0)) {
+    *buf = g_forced_uart_char;
+  }
+  return PORT_OK;
+}
+
+/* Helper: registra el callback y fija el byte a "recibir".
+   NOTA: Algunas versiones de CMock generan AddCallback, otras StubWithCallback.
+   Usa una; si linkea mal, cambia a la otra (ver comentario abajo). */
+static void simulate_uart_rx(uint8_t ch) {
+  g_forced_uart_char = ch;
+
+  // Usa UNA de estas dos líneas según lo que te genere CMock:
+  port_uart_receive_AddCallback(uart_receive_stub); // <- PRUEBA ESTA PRIMERO
+  // port_uart_receive_StubWithCallback(uart_receive_stub); // <- Si la de arriba da "undefined reference", usa esta
+}
+// ================================================================
 
 void setUp(void) {
   port_mpu_init_Expect();
@@ -43,10 +52,8 @@ void test_estado_inicial_idle(void) {
   TEST_ASSERT_EQUAL(ESTADO_IDLE, app_get_state());
 }
 
-// Forzamos que UART entregue '1' y dispare ESTADO_MPU
 void test_idle_uart_1_va_a_mpu_y_vuelve_idle_con_delay(void) {
-  port_uart_receive_ExpectAnyArgsAndReturn(PORT_OK);
-  UART_RETURN_CHAR('1'); // <--- usar helper
+  simulate_uart_rx('1');
 
   app_step();
   TEST_ASSERT_EQUAL(ESTADO_MPU, app_get_state());
@@ -58,10 +65,8 @@ void test_idle_uart_1_va_a_mpu_y_vuelve_idle_con_delay(void) {
   TEST_ASSERT_EQUAL(ESTADO_IDLE, app_get_state());
 }
 
-// Borrar SD con error -> pasa por ESTADO_ERROR y anuncia por UART
 void test_borrar_sd_error_y_manejo_error(void) {
-  port_uart_receive_ExpectAnyArgsAndReturn(PORT_OK);
-  UART_RETURN_CHAR('4'); // <--- usar helper
+  simulate_uart_rx('4');
 
   app_step(); // -> ESTADO_BORRAR_SD
   port_sd_truncate_ExpectAndReturn(PORT_ERR);
@@ -69,5 +74,6 @@ void test_borrar_sd_error_y_manejo_error(void) {
 
   port_uart_print_Expect(" Error detectado!\r\n");
   app_step(); // -> vuelve a IDLE
+
   TEST_ASSERT_EQUAL(ESTADO_IDLE, app_get_state());
 }
