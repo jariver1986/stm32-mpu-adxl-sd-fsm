@@ -3,14 +3,15 @@
   :which_ceedling: gem
   :ceedling_version: 1.0.1
   :use_mocks: TRUE
-  :use_test_preprocessor: :mocks
-  :use_deep_preprocessor: :mocks
+  # ¡IMPORTANTE!: preprocesadores activos para detectar includes "mock_*.h"
+  :use_test_preprocessor: :all
+  :use_deep_preprocessor: :all
   :use_backtrace: :simple
   :use_decorators: :auto
   :build_root: build
   :test_file_prefix: test_
   :default_tasks:
-    - test:all          # <-- en lista multilínea (no inline)
+    - test:all
   :test_threads: 8
   :compile_threads: 8
 
@@ -20,6 +21,13 @@
     - gcov
     - report_tests_log_factory
     - report_tests_pretty_stdout
+
+# Para que CMock sea “verboso” y detecte mejor los includes
+:cmock:
+  :verbosity: 3
+  :mock_prefix: 'mock_'
+  :when_no_prototypes: :warn
+  :enforce_strict_ordering: true
 
 :report_tests_log_factory:
   :report_path: build/artifacts/test
@@ -36,8 +44,8 @@
   :source:
     - src/**
   :include:
-    - inc
-    - ports
+    - inc         # ← carpetas (sin /**)
+    - ports       # ← carpetas (sin /**)
   :support:
     - test/support
   :libraries: []
@@ -59,6 +67,8 @@
     :html_high_threshold: 90
     :xml: true
     :xml_filename: build/artifacts/gcov/gcovr/GcovCoverageCobertura.xml
+
+# Evita problemas de PATH con gcovr en Windows
 :tools:
   :gcovr:
     :executable: python
