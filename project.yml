@@ -66,8 +66,8 @@
     :xml_filename: build/artifacts/gcov/gcovr/GcovCoverageCobertura.xml
 :tools:
   :gcovr:
-    :executable: py
+    :executable: "./.venv/Scripts/gcovr.exe"
     :name: gcovr
-    :arguments:
-      - -m
-      - gcovr
+    :arguments: []
+  :test_compiler:
+    :executable: gcc
