@@ -7,7 +7,7 @@
 #include "mock_port_sd.h"
 #include "mock_port_delay.h"
 
-// ===== Stub para simular recepción por UART (vía callback) =====
+// ======== UART callback stub ========
 static uint8_t g_forced_uart_char = 0;
 
 static port_status_t uart_receive_stub(uint8_t *buf,
@@ -22,19 +22,23 @@ static port_status_t uart_receive_stub(uint8_t *buf,
   return PORT_OK;
 }
 
-/* Helper: registra el callback y fija el byte a "recibir".
-   NOTA: Algunas versiones de CMock generan AddCallback, otras StubWithCallback.
-   Usa una; si linkea mal, cambia a la otra (ver comentario abajo). */
+/* Registra el callback y fija el byte a recibir.
+ * - Si existe StubWithCallback, lo usamos (no limita # de llamadas).
+ * - Si no existe, usamos IgnoreAndReturn + AddCallback para evitar fallos por conteo. */
 static void simulate_uart_rx(uint8_t ch) {
   g_forced_uart_char = ch;
 
-  // Usa UNA de estas dos líneas según lo que te genere CMock:
-  port_uart_receive_AddCallback(uart_receive_stub); // <- PRUEBA ESTA PRIMERO
-  // port_uart_receive_StubWithCallback(uart_receive_stub); // <- Si la de arriba da "undefined reference", usa esta
+#if defined(port_uart_receive_StubWithCallback)
+  port_uart_receive_StubWithCallback(uart_receive_stub);
+#else
+  port_uart_receive_IgnoreAndReturn(PORT_OK);
+  port_uart_receive_AddCallback(uart_receive_stub);
+#endif
 }
-// ================================================================
+// ====================================
 
 void setUp(void) {
+  // Expectativas de inicialización que ejecuta app_init()
   port_mpu_init_Expect();
   port_adxl_init_Expect();
   port_sd_init_ExpectAndReturn(PORT_OK);
@@ -77,3 +81,19 @@ void test_borrar_sd_error_y_manejo_error(void) {
 
   TEST_ASSERT_EQUAL(ESTADO_IDLE, app_get_state());
 }
+
+void test_idle_uart_2_va_a_adxl_y_vuelve_idle_con_delay(void) {
+  ñañ simulate_uart_rx('2');
+
+  app_step(); // -> ESTADO_ADXL
+  TEST_ASSERT_EQUAL(ESTADO_ADXL, app_get_state());
+
+  port_delay_read_adxl_ExpectAndReturn(1);
+  port_adxl_read_and_printf_Expect();
+
+  app_step(); // -> IDLE
+  TEST_ASSERT_EQUAL(ESTADO_IDLE, app_get_state());
+}
+
+// ceedling clobber
+// ceedling test:all
