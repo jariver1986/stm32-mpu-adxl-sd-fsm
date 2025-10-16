@@ -1,43 +1,56 @@
 name: CI
 
 on:
-  push:
   pull_request:
+  push:
 
 jobs:
-  test:
+  lint-and-test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Instalar Ruby (para Ceedling)
+      # ---- Formato / pre-commit ----
+      - name: Instalar Python para pre-commit
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar pre-commit
+        run: python -m pip install --upgrade pip pre-commit
+
+      - name: Correr pre-commit (si existe config)
+        if: ${{ hashFiles('.pre-commit-config.yaml') != '' }}
+        run: pre-commit run --all-files
+
+      # ---- Ceedling + cobertura ----
+      - name: Instalar Ruby (Ceedling)
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
-          bundler-cache: false
 
       - name: Instalar Ceedling
         run: gem install ceedling
 
-      - name: Instalar GCC y herramientas
+      - name: Instalar toolchain (gcc/gcov)
         run: sudo apt-get update && sudo apt-get install -y build-essential gcov
 
-      - name: Instalar Python + gcovr
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - run: python -m pip install --upgrade pip gcovr
+      - name: Instalar gcovr
+        run: python -m pip install gcovr
 
       - name: Ejecutar tests con cobertura
         run: ceedling gcov:all
 
-      - name: Publicar artefactos de reportes
+      # ---- Publicar artefactos (tests + cobertura) ----
+      - name: Subir reportes de tests y cobertura
         uses: actions/upload-artifact@v4
         with:
           name: reports
           path: |
             build/artifacts/gcov/tests_report.html
             build/artifacts/gcov/junit_tests_report.xml
+            build/artifacts/gcov/cppunit_tests_report.xml
             build/artifacts/gcov/gcovr/*.html
             build/artifacts/gcov/gcovr/*.xml
