@@ -108,5 +108,19 @@ void test_idle_uart_3_va_a_sd_y_vuelve_idle_si_append_ok(void) {
   TEST_ASSERT_EQUAL(ESTADO_IDLE, app_get_state());
 }
 
+void test_sd_append_falla_va_a_error_y_luego_idle(void) {
+  simulate_uart_rx('3'); // desde IDLE, comando '3' -> ESTADO_SD
+  app_step();            // transición a ESTADO_SD
+
+  port_delay_read_sd_ExpectAndReturn(1);
+  port_sd_append_latest_ExpectAndReturn(PORT_ERR);
+  app_step(); // falla -> ESTADO_ERROR
+
+  port_uart_print_Expect(" Error detectado!\r\n");
+  app_step(); // maneja error -> vuelve a IDLE
+
+  TEST_ASSERT_EQUAL(ESTADO_IDLE, app_get_state());
+}
+
 // ceedling clobber
 // ceedling test:all
