@@ -122,5 +122,15 @@ void test_sd_append_falla_va_a_error_y_luego_idle(void) {
   TEST_ASSERT_EQUAL(ESTADO_IDLE, app_get_state());
 }
 
+void test_idle_uart_5_lee_sd_ok_y_vuelve_idle(void) {
+  simulate_uart_rx('5');
+
+  app_step(); // -> ESTADO_LEER_SD
+  port_sd_dump_uart_ExpectAndReturn(PORT_OK);
+
+  app_step(); // -> IDLE
+  TEST_ASSERT_EQUAL(ESTADO_IDLE, app_get_state());
+}
+
 // ceedling clobber
 // ceedling test:all
