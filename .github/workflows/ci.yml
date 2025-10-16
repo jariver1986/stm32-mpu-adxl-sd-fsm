@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Ruby (para Ceedling)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: false
+
+      - name: Instalar Ceedling
+        run: gem install ceedling
+
+      - name: Instalar GCC y herramientas
+        run: sudo apt-get update && sudo apt-get install -y build-essential gcov
+
+      - name: Instalar Python + gcovr
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --upgrade pip gcovr
+
+      - name: Ejecutar tests con cobertura
+        run: ceedling gcov:all
+
+      - name: Publicar artefactos de reportes
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            build/artifacts/gcov/tests_report.html
+            build/artifacts/gcov/junit_tests_report.xml
+            build/artifacts/gcov/gcovr/*.html
+            build/artifacts/gcov/gcovr/*.xml

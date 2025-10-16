@@ -33,3 +33,6 @@ Este proyecto utiliza **Ceedling** y **gcovr** para medir la cobertura de códig
 ├── project.yml
 ├── .gitignore
 └── README.md
+
+
+![CI](https://github.com/jariver1986/stm32-mpu-adxl-sd-fsm/actions/workflows/ci.yml/badge.svg)
