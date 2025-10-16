@@ -83,13 +83,26 @@ void test_borrar_sd_error_y_manejo_error(void) {
 }
 
 void test_idle_uart_2_va_a_adxl_y_vuelve_idle_con_delay(void) {
-  ñañ simulate_uart_rx('2');
+  simulate_uart_rx('2');
 
   app_step(); // -> ESTADO_ADXL
   TEST_ASSERT_EQUAL(ESTADO_ADXL, app_get_state());
 
   port_delay_read_adxl_ExpectAndReturn(1);
   port_adxl_read_and_printf_Expect();
+
+  app_step(); // -> IDLE
+  TEST_ASSERT_EQUAL(ESTADO_IDLE, app_get_state());
+}
+
+void test_idle_uart_3_va_a_sd_y_vuelve_idle_si_append_ok(void) {
+  simulate_uart_rx('3');
+
+  app_step(); // -> ESTADO_SD
+  TEST_ASSERT_EQUAL(ESTADO_SD, app_get_state());
+
+  port_delay_read_sd_ExpectAndReturn(1);
+  port_sd_append_latest_ExpectAndReturn(PORT_OK);
 
   app_step(); // -> IDLE
   TEST_ASSERT_EQUAL(ESTADO_IDLE, app_get_state());
